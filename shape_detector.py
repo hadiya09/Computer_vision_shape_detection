@@ -25,7 +25,7 @@ if img is None:
 # Process the image for shape detection
 output_img = img.copy()
 gray = cv2.cvtColor(output_img, cv2.COLOR_BGR2GRAY)
-_, threshold = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+_, threshold = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
 contours, _ = cv2.findContours(
     threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
 )
