@@ -10,7 +10,6 @@ uploaded_file = st.file_uploader(
     "Choose an image...", type=["png", "jpg", "jpeg"]
 )
 
-# If no file is uploaded, show a message and stop here
 if uploaded_file is None:
   st.info("👆 Please upload an image to start shape detection.")
   st.stop()
@@ -38,37 +37,35 @@ for cnt in contours:
 
   cv2.drawContours(output_img, [approx], 0, (0, 0, 255), 3)
   x, y = approx.ravel()[0], approx.ravel()[1] - 10
+  vertices = len(approx)
 
-  if len(approx) == 3:
-    cv2.putText(
-        output_img,
-        "Triangle",
-        (x, y),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (0, 150, 0),
-        2,
-    )
-  elif len(approx) == 4:
-    cv2.putText(
-        output_img,
-        "Rectangle",
-        (x, y),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (0, 150, 0),
-        2,
-    )
-  elif len(approx) > 4:
-    cv2.putText(
-        output_img,
-        "Circle",
-        (x, y),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (0, 150, 0),
-        2,
-    )
+  # Classify shapes accurately based on corners and proportions
+  if vertices == 3:
+    shape_name = "Triangle"
+  elif vertices == 4:
+    # Check aspect ratio to distinguish Square from Rectangle
+    _, _, w, h = cv2.boundingRect(approx)
+    aspect_ratio = float(w) / h
+    if 0.95 <= aspect_ratio <= 1.05:
+      shape_name = "Square"
+    else:
+      shape_name = "Rectangle"
+  elif vertices == 5:
+    shape_name = "Pentagon"
+  elif vertices == 6:
+    shape_name = "Hexagon"
+  else:
+    shape_name = "Circle"
+
+  cv2.putText(
+      output_img,
+      shape_name,
+      (x, y),
+      cv2.FONT_HERSHEY_SIMPLEX,
+      0.6,
+      (0, 150, 0),
+      2,
+  )
 
 # Convert OpenCV image (BGR) to RGB for Streamlit display
 output_img_rgb = cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB)
