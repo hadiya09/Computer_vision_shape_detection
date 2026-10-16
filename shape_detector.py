@@ -3,39 +3,25 @@ import numpy as np
 import streamlit as st
 
 st.title("Geometric Shape Detection with OpenCV")
-st.write(
-    "This app detects triangles, rectangles, and circles using computer"
-    " vision."
-)
+st.write("Upload an image with shapes to detect and classify them!")
 
 # Option to upload an image
 uploaded_file = st.file_uploader(
-    "Choose an image with shapes...", type=["png", "jpg", "jpeg"]
+    "Choose an image...", type=["png", "jpg", "jpeg"]
 )
 
-img = None
-if uploaded_file is not None:
-  # Read uploaded image safely
-  file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-  img = cv2.imdecode(file_bytes, 1)
-  if img is None:
-    st.error(
-        "Could not decode the uploaded image. Please try a different file."
-    )
+# If no file is uploaded, show a message and stop here
+if uploaded_file is None:
+  st.info("👆 Please upload an image to start shape detection.")
+  st.stop()
 
-# Fallback: If no file is uploaded or decoding failed, use the default shape image
+# Read the uploaded image safely
+file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+img = cv2.imdecode(file_bytes, 1)
+
 if img is None:
-  img = np.ones((400, 400, 3), dtype=np.uint8) * 255
-  # Triangle
-  pts_triangle = np.array([[200, 50], [80, 250], [320, 250]], np.int32)
-  cv2.fillPoly(img, [pts_triangle], (0, 255, 0))
-  # Rectangle
-  cv2.rectangle(img, (50, 280), (180, 360), (255, 0, 0), -1)
-  # Circle
-  cv2.circle(img, (300, 320), 40, (0, 0, 255), -1)
-  st.info(
-      "Showing a default sample image. Upload your own image above if you like!"
-  )
+  st.error("Could not decode the uploaded image. Please try a different file.")
+  st.stop()
 
 # Process the image for shape detection
 output_img = img.copy()
